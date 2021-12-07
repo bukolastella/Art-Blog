@@ -1,9 +1,26 @@
-exports.createPages = async ({ actions }) => {
+const { node } = require("prop-types")
+
+exports.createPages = async ({ graphql, actions }) => {
+  const { data } = await graphql(
+    `
+      query MyQuery {
+        allMarkdownRemark {
+          nodes {
+            frontmatter {
+              slug
+            }
+          }
+        }
+      }
+    `
+  )
+
   const { createPage } = actions
-  createPage({
-    path: "/using-dsg",
-    component: require.resolve("./src/templates/using-dsg.js"),
-    context: {},
-    defer: true,
+  data.allMarkdownRemark.nodes.forEach(element => {
+    createPage({
+      path: element.frontmatter.slug,
+      component: require.resolve("./src/templates/Details.js"),
+      context: { slug: element.frontmatter.slug },
+    })
   })
 }
