@@ -7,7 +7,16 @@ import { graphql } from "gatsby"
 // import Seo from "../components/seo"
 
 const IndexPage = ({ data }) => {
+  const { edges } = data.allSanityPost
   const { description, title, year } = data.site.siteMetadata
+  //
+  let groupByN = (n, data) => {
+    let result = []
+    for (let i = 0; i < data.length; i += n) result.push(data.slice(i, i + n))
+    return result
+  }
+  //
+  const sanityProjects = groupByN(3, edges)
   return (
     <div>
       <nav
@@ -101,7 +110,9 @@ const IndexPage = ({ data }) => {
         {/*  */}
         <div className="bg-customIssue">
           <Issues />
-          <Issues />
+          {sanityProjects.map((ev, i) => (
+            <Issues contents={ev} key={i} no={i} />
+          ))}
         </div>
       </main>
     </div>
@@ -117,6 +128,53 @@ export const query = graphql`
         description
         title
         year
+      }
+    }
+
+    allSanityPost {
+      edges {
+        node {
+          title
+          publishedAt(formatString: "D/M/YY")
+          body {
+            children {
+              text
+            }
+          }
+          mainImage {
+            asset {
+              gatsbyImageData(
+                placeholder: DOMINANT_COLOR
+                width: 230
+                height: 300
+              )
+            }
+          }
+          id
+          slug {
+            current
+          }
+        }
+      }
+    }
+
+    allMarkdownRemark(sort: { fields: frontmatter___date, order: ASC }) {
+      nodes {
+        frontmatter {
+          slug
+          title
+          date(formatString: "D/M/YY")
+          img {
+            childImageSharp {
+              gatsbyImageData(
+                placeholder: DOMINANT_COLOR
+                width: 230
+                height: 300
+              )
+            }
+          }
+        }
+        id
       }
     }
   }
